@@ -100,4 +100,44 @@ Interval<T> fibonacciSearch(T (*f)(T), T a, T b, int n, T epsilon){
     return interval;
 }
 
+// algorithm 3.3
+// brief: golden section search
+// param: 
+//      f: 指向单峰函数的指针
+//      a,b: 包含函数极小值点的区间
+//      n: 调用单峰函数的次数
+// birth: created by ZJM on 20220727
+template<typename T>
+Interval<T> goldenSectionSearch(T (*f)(T), T a, T b, int n){
+    T phi = (1 + sqrt(5)) / 2;
+    T rho = phi - 1;
+    T d = rho * b + (1 - rho) * a;
+    T yd = (*f)(d);
+    T c, yc;
+    for(int i = 0; i < n-1; i++){
+        c = rho * a + (1 - rho) * b;
+        yc = (*f)(c);
+        if(yc < yd){
+            b = d;
+            d = c;
+            yd = yc;
+        }
+        else{
+            a = b;
+            b = c;
+        }
+    }
+    Interval<T> interval;
+    if(a < b){
+        interval.lowerBound = a;
+        interval.upperBound = b;
+    }
+    else{
+        interval.lowerBound = b;
+        interval.upperBound = a;
+    }
+    return interval;    
+}
+
+
 #endif

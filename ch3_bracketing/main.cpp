@@ -26,7 +26,7 @@ int main(void){
     cout << "upper bound: " << interval3.upperBound << endl;
     
     // test algorithm 3.2
-    cout << "algorithm 3.2" << endl;
+    cout << endl << "algorithm 3.2" << endl;
     Interval<double> interval4 = fibonacciSearch<double>(unimodalityFunc<double>, interval1.lowerBound, interval1.upperBound, 8, 0.01l);
     cout << "lower bound: " << interval4.lowerBound << endl;
     cout << "upper bound: " << interval4.upperBound << endl;
@@ -34,6 +34,18 @@ int main(void){
     Interval<float> interval5 = fibonacciSearch<float>(unimodalityFunc<float>, interval2.lowerBound, interval2.upperBound, 8, 0.01f);
     cout << "lower bound: " << interval5.lowerBound << endl;
     cout << "upper bound: " << interval5.upperBound << endl;       
+
+    // test algorithm 3.3
+    cout << endl << "algorithm 3.3" << endl;
+    Interval<double> interval6 = goldenSectionSearch<double>(unimodalityFunc<double>, interval1.lowerBound, interval1.upperBound, 8);
+    cout << "lower bound: " << interval6.lowerBound << endl;
+    cout << "upper bound: " << interval6.upperBound << endl;
+
+    Interval<float> interval7 = fibonacciSearch<float>(unimodalityFunc<float>, interval2.lowerBound, interval2.upperBound, 8, 0.01f);
+    cout << "lower bound: " << interval7.lowerBound << endl;
+    cout << "upper bound: " << interval7.upperBound << endl;  
+
+    
 
     return 0;
 }
