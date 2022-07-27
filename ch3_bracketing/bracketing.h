@@ -2,24 +2,20 @@
 #define __BRACKETING_H__
 
 #include<math.h>
-
-template<typename T>
-struct Interval
-{
-    T lowerBound;
-    T upperBound;
-};
+#include<tuple>
+#include<vector>
+#include<limits>
 
 // algorithm 3.1
-// brief: 计算单峰函数极小值点所在的区间
+// brief: find interval that contains minimum of unimodality function
 // param: 
-//      f: 指向单峰函数的指针
-//      x: 初始点
-//      step: 寻找极小值点时采用的步长
-//      k: 步长增长的倍数
+//      f: pointer of unimodality function
+//      x: initial evaluation point
+//      step: step size
+//      k: expand factor
 // birth: created by ZJM on 20220726
 template<typename T>
-Interval<T> bracketMinimum(T (*f)(T), T x, T step, T k){
+std::tuple<T, T> bracketMinimum(T (*f)(T), T x, T step, T k){
     T a = x;
     T ya = (*f)(a);
     T b = x + step;
@@ -34,15 +30,10 @@ Interval<T> bracketMinimum(T (*f)(T), T x, T step, T k){
         c = b + step;
         yc = (*f)(c);
         if(yc > yb){
-            Interval<T> interval;
             if(a < c){          
-                interval.lowerBound = a;
-                interval.upperBound = c;
-                return interval;
+                return std::tuple<T, T>(a, c);
             }else{
-                interval.lowerBound = c;
-                interval.upperBound = a;
-                return interval;
+                return std::tuple<T, T>(c, a);
             }
         }
         a = b;
@@ -56,13 +47,13 @@ Interval<T> bracketMinimum(T (*f)(T), T x, T step, T k){
 // algorithm 3.2
 // brief: fibonacci search
 // param: 
-//      f: 指向单峰函数的指针
-//      a,b: 包含函数极小值点的区间
-//      n: 调用单峰函数的次数
+//      f: pointer of unimodality function
+//      a,b: interval contains minimum
+//      n: max evaluation time of unimodality function
 //      epsilon: 
 // birth: created by ZJM on 20220727
 template<typename T>
-Interval<T> fibonacciSearch(T (*f)(T), T a, T b, int n, T epsilon){
+std::tuple<T, T> fibonacciSearch(T (*f)(T), T a, T b, int n, T epsilon){
     T s = (1 - sqrt(5)) / (1 + sqrt(5));
     T phi = (1 + sqrt(5)) / 2;
     T rho = 1 / (phi * (1 - pow(s, n+1)) / (1 - pow(s, n)));
@@ -88,27 +79,23 @@ Interval<T> fibonacciSearch(T (*f)(T), T a, T b, int n, T epsilon){
         }
         rho = 1 / (phi * (1 - pow(s, n-i)) / (1 - pow(s, n-i-1)));
     }
-    Interval<T> interval;
     if(a < b){
-        interval.lowerBound = a;
-        interval.upperBound = b;
+        return std::tuple<T, T>(a, b);
     }
     else{
-        interval.lowerBound = b;
-        interval.upperBound = a;
+        return std::tuple<T, T>(b, a);
     }
-    return interval;
 }
 
 // algorithm 3.3
 // brief: golden section search
 // param: 
-//      f: 指向单峰函数的指针
-//      a,b: 包含函数极小值点的区间
-//      n: 调用单峰函数的次数
+//      f: pointer of unimodality function
+//      a,b: interval contains minimum
+//      n: max evaluation time of unimodality function
 // birth: created by ZJM on 20220727
 template<typename T>
-Interval<T> goldenSectionSearch(T (*f)(T), T a, T b, int n){
+std::tuple<T, T> goldenSectionSearch(T (*f)(T), T a, T b, int n){
     T phi = (1 + sqrt(5)) / 2;
     T rho = phi - 1;
     T d = rho * b + (1 - rho) * a;
@@ -127,17 +114,119 @@ Interval<T> goldenSectionSearch(T (*f)(T), T a, T b, int n){
             b = c;
         }
     }
-    Interval<T> interval;
     if(a < b){
-        interval.lowerBound = a;
-        interval.upperBound = b;
+        return std::tuple<T, T>(a, b);
     }
     else{
-        interval.lowerBound = b;
-        interval.upperBound = a;
-    }
-    return interval;    
+        return std::tuple<T, T>(b, a);
+    } 
 }
 
+// algorithm 3.4
+// brief: quadratic fit search
+// param:
+//      f: pointer of unimodality function
+//      a,b,c: interval contains minimum, a < b < c
+//      n: max evaluation time of unimodality function
+// birth: created by ZJM on 20220727
+template<typename T>
+std::tuple<T, T, T> quadraticFitSearch(T (*f)(T), T a, T b, T c, int n){
+    T ya = (*f)(a);
+    T yb = (*f)(b);
+    T yc = (*f)(c);
+    T x, yx;
+    for(int i = 0; i < n-3; i++){
+        x = 0.5 * (ya * (b*b - c*c) + yb * (c*c - a*a) + yc * (a*a - b*b)) / (ya * (b-c) + yb * (c-a) + yc*(a-b));
+        yx = (*f)(x);
+        if(x > b){
+            if(yx > yb){
+                c = x;
+                yc = yx;
+            }
+            else{
+                a = b;
+                ya = yb;
+                b = x;
+                yb = yx;
+            }
+        }
+        else if(x < b){
+            if(yx > yb){
+                a = x;
+                ya = yx;
+            }
+            else{
+                c = b;
+                yc = yb;
+                b = x;
+                yb = yx;
+            }
+        }        
+    }
+    return std::tuple<T, T, T>(a, b, c);
+}
+
+template<typename T>
+struct Point2D{
+    Point2D(){};
+
+    template<typename T1>
+    Point2D(T1 x, T1 y): x(x), y(y){}
+
+    template<typename T2>
+    Point2D<T2> &operator=(Point2D<T2> &rhs){ x=rhs.x; y=rhs.y; return *this;}
+
+    T x;
+    T y;
+};
+
+template<typename T>
+Point2D<T> getSpIntersection(Point2D<T> A, Point2D<T> B, T l){
+    T t = ((A.y - B.y) - l * (A.x - B.x)) / 2 / l;
+    return Point2D<T>(A.x + t, A.y - t*l);
+}
+
+// algorithm 3.5
+// brief: shubert-piyavskii method
+// param: 
+//      f: pointer of unimodality function
+//      a,b: interval contains minimum
+//      l:  Lipschitz constant
+//      epsilon: termination tolerance
+// birth: created by ZJM on 20220727
+template<typename T>
+Point2D<T> shubertPiyavskii(T (*f)(T), T a, T b, T l, T epsilon){
+    T m = (a + b) / 2;
+    Point2D<T> A(a, (*f)(a));
+    Point2D<T> M(m, (*f)(m));
+    Point2D<T> B(b, (*f)(b));
+    Point2D<T> AM = getSpIntersection(A, M, l);
+    Point2D<T> MB = getSpIntersection(M, B, l);
+    std::vector<Point2D<T>> pts{A, AM, M, MB, B};
+    T diff = std::numeric_limits<T>::infinity();
+    Point2D<T> p, pPrev, pNext;
+    int i;
+    while(diff > epsilon){
+        i = 0;
+        for(int idx = 0; idx < pts.size(); idx++){
+            if(pts[idx].y < pts[i].y) i = idx;
+        }
+        p.x = pts[i].x;
+        p.y = (*f)(p.x);
+        diff = p.y - pts[i].y;
+
+        pPrev = getSpIntersection(pts[i-1], p, l);
+        pNext = getSpIntersection(p, pts[i+1], l);
+
+        pts[i] = p;
+        pts.insert(pts.begin() + i + 1, pNext);
+        pts.insert(pts.begin() + i, pPrev);
+    }
+    i = 0;
+    for(int idx = 0; idx < pts.size(); idx+=2){
+        if(pts[idx].y < pts[i].y) i = idx;
+    }
+    return pts[i];
+}
 
 #endif
