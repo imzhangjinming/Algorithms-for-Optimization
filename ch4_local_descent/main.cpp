@@ -28,5 +28,10 @@ int main(void){
                                                     designPoint, direction, 10.0, 0.5, 1e-4);
     cout << "alpha = " << alpha << endl;
 
+    // test algorithm 4.3 
+    cout << endl << "algorithm 4.3" << endl;
+    alpha = strongBacktracking<double>(objective<double>, derivative<double>, designPoint, direction, 1.0, 1e-4, 0.1);
+    cout << "alpha = " << alpha << endl;
+
     return 0;
 }
