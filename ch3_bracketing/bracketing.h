@@ -229,4 +229,36 @@ Point2D<T> shubertPiyavskii(T (*f)(T), T a, T b, T l, T epsilon){
     return pts[i];
 }
 
+// algorithm 3.6
+// brief: bisection algorithm
+// param:
+//      g: derivative of univariate function
+//      a,b: initial interval
+//      epsilon: interval width tolerance
+// birth: created by ZJM on 20220728
+template<typename T>
+std::tuple<T, T> bisection(T (*g)(T), T a, T b, T epsilon){
+    if(a > b){ a = a + b; b = a - b; a = a - b;}
+    T ya = (*g)(a);
+    T yb = (*g)(b);
+    if(ya == 0) b = a;
+    if(yb == 0) a = b;
+    T m, ym;
+    while(b - a > epsilon){
+        m = (a + b) / 2;
+        ym = (*g)(m);
+        if(ym == 0){
+            a = m;
+            b = m;
+        }
+        else if(ym * ya > 0){
+            a = m;
+        }
+        else if(ym * yb > 0){
+            b = m;
+        }
+    }
+    return std::tuple<T, T>(a, b);
+}
+
 #endif

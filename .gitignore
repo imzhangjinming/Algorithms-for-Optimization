@@ -35,3 +35,6 @@
 **/.vscode
 
 **/*.dSYM
+
+# Eigen library
+**/eigen

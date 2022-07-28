@@ -12,6 +12,12 @@ T unimodalityFunc(T x){
     return exp(-x + 1) + x - 1;  //;x * x - 2 * x + 1
 }
 
+// derivative of unimodality function
+template<typename T>
+T derivative(T x){
+    return -exp(-x + 1) + 1;
+}
+
 int main(void){
     // test algorithm 3.1
     cout << "algorithm 3.1" << endl;
@@ -77,5 +83,15 @@ int main(void){
     Point2D<float> p2 = shubertPiyavskii<float>(unimodalityFunc<float>, get<0>(interval2), get<1>(interval2), 5.0, 0.1);
     cout << "x: " << p2.x << ", " << "y: " << p2.y << endl; 
 
+    // test algorithm 3.6
+    cout << endl << "algorithm 3.6" << endl;
+    tuple<double, double> interval10 = bisection<double>(derivative<double>, -5.0, 5.0, 1e-3);
+    cout << "lower bound: " << get<0>(interval10) << endl;
+    cout << "upper bound: " << get<1>(interval10) << endl;     
+
+    tuple<float, float> interval11 = bisection<float>(derivative<float>, -5.0, 5.0, 1e-3);
+    cout << "lower bound: " << get<0>(interval11) << endl;
+    cout << "upper bound: " << get<1>(interval11) << endl;     
+    
     return 0;
 }
